@@ -114,8 +114,8 @@ def main(argv):
         sys.exit(0)
         return
     elif numinstances == 0 or numinstances > 1:
-        for pair in sorted(instances, key=lambda p: p[0]):
-            print "%s\t%s" % pair
+        for instance_pair in sorted(instances, key=lambda p: p[0]):
+            print "%s" % instance_pair[1]
 
         sys.exit(0)
         return

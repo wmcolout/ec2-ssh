@@ -58,8 +58,8 @@ else
     cmd="$cmd -t $tag"
 fi
 
-# get host from ec2-host command
-host=$(eval "$cmd $inst")
+# get host from ec2-host command - if more than one, take first
+host=$(eval "$cmd $inst" | head -n 1)
 
 # pass all other parameters (${@:2}) to ssh allowing
 # things like: ec2-ssh nginx uptime
