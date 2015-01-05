@@ -4,33 +4,29 @@ set -e
 
 usage() {
     cat<<EOF
-Usage: ec2-ssh [-k KEY] [-s SECRET] [-r REGION] [-t TAG] <instance-name>
+Usage: ec2-ssh [-t TAG] [username@]<tag-value> [extra-ssh-args]
 
-Open an ssh connection to an EC2 instance where <instance-name>=tag:value.
-The 'tag:' portion of <instance-name> is optional, and defaults to 'Name'.
-For a list of instances, run ec2-host without any paramteres
+SSH into an ec2 host where <tag-value> matches a tag which defaults to 'Name'
+or environment variable EC2_HOST_TAG. In the case there is more than one such
+instance, one will be chosen at random. 'username' defaults to ubuntu.  A small
+bashrc file is added over ssh to give a nice prompt. Any extra arguments at the
+end are passed to ssh directly.
 
   -h            display this help and exit
-  -k, KEY       Amazon EC2 Key, defaults to \$AWS_ACCESS_KEY_ID
-  -s, SECRET    Amazon EC2 Secret, defaults to \$AWS_SECRET_ACCESS_KEY
-  -r, REGION    Amazon EC2 Region, defaults to us-east-1
-  -t, TAG       Tag name for searching, defaults to 'Name'
+  -t, TAG       Tag name to match, defaults to 'Name' or env var EC2_HOST_TAG
 EOF
 }
 
 # Print usage message and exit if no arguments are given
 test $# -eq 0 && { usage; exit; }
 
+
 # Process options
-cmd="ec2-host"
-while getopts ":hk:s:r:t:" opt; do
+tag=$EC2_HOST_TAG  # default
+while getopts ":h:t:" opt; do
     case $opt in
         h  ) usage; exit 1;;
-        k  ) cmd="$cmd -k $OPTARG";;
-        s  ) cmd="$cmd -s $OPTARG";;
-        r  ) cmd="$cmd -r $OPTARG";;
-        t  ) cmd="$cmd -t $OPTARG";;
-        \? ) usage; exit 1
+        t  ) tag=$OPTARG
     esac
 done
 shift $((OPTIND - 1))
@@ -46,25 +42,22 @@ if [ -z "$inst" ]; then
   user="ubuntu"
 fi
 
-# support tag:value format for identifying instances
-IFS=":"; declare -a tagparts=($inst)
-
-tag="${tagparts[0]}"
-value="${tagparts[1]}"
-
-if [ -z "$value" ]; then
-    value="$inst"
-else
-    cmd="$cmd -t $tag"
-fi
-
 # get host from ec2-host command - if more than one, take first
-host=$(eval "$cmd $inst" | head -n 1)
-
-# pass all other parameters (${@:2}) to ssh allowing
-# things like: ec2-ssh nginx uptime
-cmd="echo \\\". ~/.bashrc && PS1='\[\e]0;$inst: \w\\\a\]\[\\\033[01;32m\]$inst\[\\\033[00m\]:\[\\\033[01;34m\]\w\[\\\033[00m\]\\\$ '\\\" > ~/.ec2sshrc; /bin/bash --rcfile .ec2sshrc -i"
-if test "${@:2}"; then
-    cmd="${@:2}"
+host_cmd="ec2-host"
+if [ "$tag" ]; then
+    host_cmd="$host_cmd -t $tag"
 fi
-test -n "$host" && echo "Connecting to $host." && exec sh -c "ssh -t $user@$host \"$cmd\""
+host=$(eval "$host_cmd $inst" | head -n 1)
+
+if test "${@:2}"; then
+    # Pass extra parameters direct to ssh
+    ssh_cmd=${@:2}
+else
+    # If no extra parameters, set a nice prompt
+    ssh_cmd="\"echo \\\". ~/.bashrc && PS1='\[\e]0;$inst: \w\\\a\]\[\\\033[01;32m\]$inst\[\\\033[00m\]:\[\\\033[01;34m\]\w\[\\\033[00m\]\\\$ '\\\" > ~/.ec2sshrc; /bin/bash --rcfile .ec2sshrc -i\""
+fi
+ssh_cmd="ssh -t $user@$host $ssh_cmd"
+
+test -n "$host" && \
+    echo "Connecting to $host." >&2 && \
+    exec sh -c "$ssh_cmd"

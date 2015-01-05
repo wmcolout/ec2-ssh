@@ -2,8 +2,8 @@
 EC2-SSH
 =======
 
-A simple command line utility, allowing you to SSH into you Amazon EC2 instances
-by their "Name" tag.
+A pair of command line utilities for finding and sshing into your Amazon EC2
+instances by tag (such as 'Name').
 
 A few examples:
 
@@ -20,20 +20,25 @@ A few examples:
 
     # w/o arg: prints all active instances
     % ec2-host
-    django1 ec2-123-45-67-89.compute-1.amazonaws.com
-    django2 ec2-132-45-67-89.compute-1.amazonaws.com
-    django3 ec2-231-45-67-89.compute-1.amazonaws.com
+    ec2-123-45-67-89.compute-1.amazonaws.com
+    ec2-132-45-67-89.compute-1.amazonaws.com
+    ec2-231-45-67-89.compute-1.amazonaws.com
 
-    # w/ arg: prints host name of matching instance
-    % ec2-host django2
-    django2 ec2-132-45-67-89.compute-1.amazonaws.com
+    # w/ arg
+    % ec2-host backend
+    ec2-132-45-67-89.compute-1.amazonaws.com
+    ec2-132-45-67-90.compute-1.amazonaws.com
+
+    # w/ tag arg too
+    % ec2-host -t environment production
+    ec2-132-45-67-90.compute-1.amazonaws.com
+    ec2-111-45-67-90.compute-1.amazonaws.com
 
 
 Links
 `````
 
-* `Website <http://github.com/Instagram/ec2-ssh>`_
-* `Instagram <http://instagram.com>`_
+* `Website <http://github.com/adamchainz/ec2-ssh>`_
 
 Changelog
 `````````
@@ -46,19 +51,18 @@ Changelog
 """
 
 
-import os
 from setuptools import setup
 
 
 setup(
     name = "ec2-ssh",
-    version = "1.2.1",
-    author = "Shayne Sweeney",
-    author_email = "shayne@instagram.com",
+    version = "1.3.0",
+    author = "Adam Johnson",
+    author_email = "me@adamj.eu",
     description = "SSH into EC2 instances via tag name",
     long_description = __doc__,
     license = "MIT",
-    url = "https://github.com/Instagram/ec2-ssh",
+    url = "https://github.com/adamchainz/ec2-ssh",
     keywords = ["amazon", "aws", "ec2", "ami", "ssh", "cloud", "boto"],
     install_requires = ['boto>=1.0'],
     scripts = ["bin/ec2-host", "bin/ec2-ssh"],
