@@ -6,7 +6,15 @@ History
 Pending
 -------
 
-* Forked by @adamchainz
+* Next version release notes here
+
+1.3.0 (2016-01-06)
+------------------
+
+* Forked by YPlan
+* Output from ec2-host is now in random order, allowing ec2-ssh to spread
+  logins between similar instances
+* Python 3 compatibility
 
 1.2.1 (2011-11-27)
 ------------------
