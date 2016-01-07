@@ -7,6 +7,10 @@ Pending
 -------
 
 * Next version release notes here
+
+1.4.0 (2016-01-07)
+------------------
+
 * ``ec2-ssh`` rewritten in Python. As part of this, the automatic 'pretty
   prompt' has been removed.
 
