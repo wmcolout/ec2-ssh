@@ -22,7 +22,7 @@ setup(
     license="MIT",
     url="https://github.com/YPlan/ec2-ssh",
     keywords=["amazon", "aws", "ec2", "ami", "ssh", "cloud", "boto"],
-    install_requires=['boto>=1.0'],
+    install_requires=['boto3>=1.1.0'],
     scripts=[
         "bin/ec2-host",
         "bin/ec2-ssh",

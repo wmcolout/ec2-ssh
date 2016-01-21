@@ -6,7 +6,7 @@ import argparse
 import os
 import random
 
-import boto.ec2
+import boto3
 
 parser = argparse.ArgumentParser(
     description="Output ec2 public host names for active hosts in random "
@@ -22,28 +22,30 @@ parser.add_argument('-t', '--tag', type=str,
 
 def main():
     args = parser.parse_args()
-    instances = get_instances(args.tag, args.value)
+    instances = get_dns_names(args.tag, args.value)
     random.shuffle(instances)
     for instance in instances:
         print(instance)
 
 
-def get_instances(tag, value):
-    conn = boto.ec2.connection.EC2Connection()
+def get_dns_names(tag, value):
+    conn = boto3.client('ec2')
 
+    filters = []
     if value:
-        filters = {'tag:' + tag: value}
-    else:
-        filters = {}
+        filters.append({
+            'Name': 'tag:' + tag,
+            'Values': [value]
+        })
 
-    reservations = conn.get_all_instances(filters=filters)
+    data = conn.describe_instances(Filters=filters)
 
-    instances = []
-    for reservation in reservations:
-        for instance in reservation.instances:
-            if instance.public_dns_name:
-                instances.append(instance.public_dns_name)
-    return instances
+    dns_names = []
+    for reservation in data['Reservations']:
+        for instance in reservation['Instances']:
+            if instance['PublicDnsName']:
+                dns_names.append(instance['PublicDnsName'])
+    return dns_names
 
 
 if __name__ == '__main__':

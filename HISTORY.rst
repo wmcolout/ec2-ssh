@@ -7,6 +7,7 @@ Pending
 -------
 
 * Next version release notes here
+* Now using ``boto3``
 
 1.4.0 (2016-01-07)
 ------------------
