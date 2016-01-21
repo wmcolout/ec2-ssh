@@ -8,6 +8,11 @@ Pending
 
 * Next version release notes here
 
+1.5.1 (2016-01-21)
+------------------
+
+* Pip failed to receive wheel in version 1.5.0, re-uploading
+
 1.5.0 (2016-01-21)
 ------------------
 
