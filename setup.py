@@ -16,7 +16,7 @@ setup(
     name="ec2-ssh-yplan",
     version="1.4.0",
     author="Adam Johnson",
-    author_email="me@adamj.eu",
+    author_email="adam@yplanapp.com",
     description="SSH into EC2 instances via tag name",
     long_description=readme + '\n\n' + history,
     license="MIT",
