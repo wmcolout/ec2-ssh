@@ -7,6 +7,10 @@ Pending
 -------
 
 * Next version release notes here
+
+1.5.2 (2016-08-17)
+------------------
+
 * Fix Python 3 bug with subprocess output type
 
 1.5.1 (2016-01-21)
