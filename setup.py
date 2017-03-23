@@ -13,7 +13,7 @@ with open('HISTORY.rst') as history_file:
 
 
 setup(
-    name="ec2-ssh-yplan",
+    name="ec2-ssh",
     version="1.5.2",
     author="Adam Johnson",
     author_email="adam@yplanapp.com",
