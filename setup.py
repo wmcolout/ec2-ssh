@@ -14,7 +14,7 @@ with open('HISTORY.rst') as history_file:
 
 setup(
     name="ec2-ssh",
-    version="1.5.2",
+    version="1.5.3",
     author="Adam Johnson",
     author_email="adam@yplanapp.com",
     description="SSH into EC2 instances via tag name",

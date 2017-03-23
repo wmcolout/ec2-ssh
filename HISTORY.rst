@@ -7,6 +7,10 @@ Pending
 -------
 
 * Next version release notes here
+
+1.5.3 (2017-03-23)
+------------------
+
 * Acquired the PyPI name ``ec2-ssh``, moved fork back there from
   ``ec2-ssh-yplan``.
 
