@@ -37,6 +37,9 @@ Usage
     % ec2-ssh root@appserver
     % ec2-ssh deploy@nginx2 sudo restart nginx
 
+    # Specifying the user with an environment variable
+    % EC2_SSH_USER=deploy ec2-ssh nginx2
+
     # ec2-host
 
     # w/o arg: prints all active instances

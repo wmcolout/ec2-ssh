@@ -18,6 +18,9 @@ parser = argparse.ArgumentParser(
 )
 parser.add_argument('-t', '--tag', type=str,
                     default=None, help="Tag to match, defaults to 'Name'")
+parser.add_argument('-u', '--user', type=str,
+                    default=os.getenv('EC2_SSH_USER', 'ubuntu'),
+                    help="Which user to connect with, defaults to 'ubuntu'")
 parser.add_argument('value', help="The value for the tag to match")
 
 
@@ -27,7 +30,7 @@ def main():
     if '@' in args.value:
         username, value = args.value.split('@', 1)
     else:
-        username = 'ubuntu'
+        username = args.user
         value = args.value
 
     host_name = get_host_name(args.tag, value)
