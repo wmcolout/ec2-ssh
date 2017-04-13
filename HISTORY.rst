@@ -7,6 +7,10 @@ Pending
 -------
 
 * Next version release notes here
+
+1.6.0 (2017-04-13)
+------------------
+
 * ``ec2-ssh`` supports specifying the username with the ``-u``/``--user`` flag
   or the ``EC2_SSH_USER`` environment variable.
 
