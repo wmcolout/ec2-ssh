@@ -12,6 +12,12 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read().replace('.. :changelog:', '')
 
 
+console_scripts = [
+    'ec2-ssh = ec2_ssh:main',
+    'ec2-host = ec2_ssh:host',
+]
+
+
 setup(
     name="ec2-ssh",
     version="1.6.0",
@@ -23,10 +29,8 @@ setup(
     url="https://github.com/YPlan/ec2-ssh",
     keywords=["amazon", "aws", "ec2", "ami", "ssh", "cloud", "boto"],
     install_requires=['boto3>=1.1.0'],
-    scripts=[
-        "bin/ec2-host",
-        "bin/ec2-ssh",
-    ],
+    py_modules=['ec2_ssh'],
+    entry_points={'console_scripts': console_scripts},
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Environment :: Console",

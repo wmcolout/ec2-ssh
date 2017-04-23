@@ -1,11 +1,11 @@
-#!/usr/bin/env python
-# -*- coding:utf-8 -*-
 from __future__ import print_function
 
 import argparse
 import os
-import subprocess
+import random
 import sys
+
+import boto3
 
 parser = argparse.ArgumentParser(
     description="""
@@ -17,7 +17,8 @@ parser = argparse.ArgumentParser(
     """
 )
 parser.add_argument('-t', '--tag', type=str,
-                    default=None, help="Tag to match, defaults to 'Name'")
+                    default=os.getenv('EC2_HOST_TAG', 'Name'),
+                    help="Tag to match, defaults to 'Name'")
 parser.add_argument('-u', '--user', type=str,
                     default=os.getenv('EC2_SSH_USER', 'ubuntu'),
                     help="Which user to connect with, defaults to 'ubuntu'")
@@ -53,13 +54,50 @@ def main():
 
 
 def get_host_name(tag, value):
-    command = ["ec2-host"]
-    if tag:
-        command.extend(["-t", tag])
-    command.append(value)
+    for host in get_dns_names(tag, value):
+        return host
 
-    hosts = subprocess.check_output(command)
-    return hosts[:hosts.find(b'\n')].decode('utf-8')
+
+def ec2_host_parser():
+    parser = argparse.ArgumentParser(
+        description="Output ec2 public host names for active hosts in random "
+                    "order, optionally match a tag which defaults to 'Name' "
+                    "or environment variable EC2_HOST_TAG."
+    )
+    parser.add_argument('value', type=str, nargs='?',
+                        help='the value the tag should equal')
+    parser.add_argument('-t', '--tag', type=str,
+                        default=os.getenv('EC2_HOST_TAG', 'Name'),
+                        help='which tag to search')
+    return parser
+
+
+def host():
+    args = ec2_host_parser().parse_args()
+    instances = get_dns_names(args.tag, args.value)
+    random.shuffle(instances)
+    for instance in instances:
+        print(instance)
+
+
+def get_dns_names(tag, value):
+    conn = boto3.client('ec2')
+
+    filters = []
+    if value:
+        filters.append({
+            'Name': 'tag:' + tag,
+            'Values': [value]
+        })
+
+    data = conn.describe_instances(Filters=filters)
+
+    dns_names = []
+    for reservation in data['Reservations']:
+        for instance in reservation['Instances']:
+            if instance['PublicDnsName']:
+                dns_names.append(instance['PublicDnsName'])
+    return dns_names
 
 
 if __name__ == '__main__':
