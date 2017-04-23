@@ -8,6 +8,14 @@ Pending
 
 * Next version release notes here
 
+1.7.0 (2017-04-23)
+------------------
+
+* Rewrite to use ``setup.py``'s ``entry_points`` feature, rather than
+  ``scripts``. This makes everything importable from the ``ec2_ssh`` module and
+  makes ``ec2-ssh`` faster as calling the ``ec2-host`` behaviour no longer
+  requires ``subprocess``.
+
 1.6.0 (2017-04-13)
 ------------------
 

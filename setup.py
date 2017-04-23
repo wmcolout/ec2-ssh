@@ -20,7 +20,7 @@ console_scripts = [
 
 setup(
     name="ec2-ssh",
-    version="1.6.0",
+    version="1.7.0",
     author="Adam Johnson",
     author_email="me@adamj.eu",
     description="SSH into EC2 instances via tag name",
