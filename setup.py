@@ -2,13 +2,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
+import codecs
 from setuptools import setup
 
 
-with open('README.rst') as readme_file:
+with codecs.open('README.rst', 'r', 'utf-8') as readme_file:
     readme = readme_file.read()
 
-with open('HISTORY.rst') as history_file:
+with codecs.open('HISTORY.rst', 'r', 'utf-8') as history_file:
     history = history_file.read().replace('.. :changelog:', '')
 
 
