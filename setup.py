@@ -3,8 +3,19 @@
 from __future__ import print_function
 
 import codecs
+import os
+import re
 
 from setuptools import setup
+
+
+def get_version(filename):
+    with codecs.open(filename, 'r', 'utf-8') as fp:
+        contents = fp.read()
+    return re.search(r"__version__ = ['\"]([^'\"]+)['\"]", contents).group(1)
+
+
+version = get_version(os.path.join('ec2_ssh.py'))
 
 with codecs.open('README.rst', 'r', 'utf-8') as readme_file:
     readme = readme_file.read()
@@ -21,7 +32,7 @@ console_scripts = [
 
 setup(
     name="ec2-ssh",
-    version="1.7.0",
+    version=version,
     author="Adam Johnson",
     author_email="me@adamj.eu",
     description="SSH into EC2 instances via tag name",

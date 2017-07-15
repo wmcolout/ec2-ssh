@@ -7,6 +7,8 @@ import sys
 
 import boto3
 
+__version__ = '1.7.0'
+
 parser = argparse.ArgumentParser(
     description="""
     SSH into an ec2 host where <tag-value> matches a tag which defaults to
