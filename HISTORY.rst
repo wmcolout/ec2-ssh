@@ -7,6 +7,10 @@ Pending
 -------
 
 * Next version release notes here
+
+1.8.0 (2017-07-19)
+------------------
+
 * Use private IP addresses for instances that don't have public ones. Such
   instances are not guaranteed to be accessible from the current host,
   depending on networking setup, but it's better the tool let's you try it.
