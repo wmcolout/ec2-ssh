@@ -99,6 +99,8 @@ def get_dns_names(tag, value):
         for instance in reservation['Instances']:
             if instance['PublicDnsName']:
                 dns_names.append(instance['PublicDnsName'])
+            elif instance['PrivateIpAddress']:
+                dns_names.append(instance['PrivateIpAddress'])
     return dns_names
 
 
