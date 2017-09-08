@@ -9,6 +9,9 @@ Pending
 * Next version release notes here
 * Both ``ec2-host`` and ``ec2-ssh`` now only show/use instances in the
   ``running`` state.
+* Use the Public IP for an instance if EC2 no Public DNS for a public instance.
+  It turns out EC2 may not return the Public DNS even when a Public IP is
+  assigned.
 
 1.8.0 (2017-07-19)
 ------------------
