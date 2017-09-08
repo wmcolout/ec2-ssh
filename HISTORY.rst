@@ -7,6 +7,8 @@ Pending
 -------
 
 * Next version release notes here
+* Both ``ec2-host`` and ``ec2-ssh`` now only show/use instances in the
+  ``running`` state.
 
 1.8.0 (2017-07-19)
 ------------------
