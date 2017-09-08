@@ -7,6 +7,10 @@ Pending
 -------
 
 * Next version release notes here
+
+1.9.0 (2017-09-08)
+------------------
+
 * Both ``ec2-host`` and ``ec2-ssh`` now only show/use instances in the
   ``running`` state.
 * Use the Public IP for an instance if EC2 no Public DNS for a public instance.

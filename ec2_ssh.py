@@ -7,7 +7,7 @@ import sys
 
 import boto3
 
-__version__ = '1.8.0'
+__version__ = '1.9.0'
 
 parser = argparse.ArgumentParser(
     description="""
