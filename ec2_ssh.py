@@ -74,7 +74,7 @@ def get_host_name(args):
                 ),
             ]
         host = inquirer.prompt(questions)["host"]
-    return host[0]
+    return host[2]
 
 
 def ec2_host_parser():
@@ -126,17 +126,25 @@ def get_instance_list(args):
             instance_meta = []
             network_namespace = None
             role = None
-            instance_meta.append(instance['PrivateIpAddress'])
+
             for tag in instance['Tags']:
                 if tag['Key'] == 'Roles':
                     role = (tag['Value'])
                 if tag['Key'] == 'network_namespace':
                     network_namespace = (tag['Value'])
 
-            instance_meta.append(role or 'None')
+            # Environment is first (least specific)
             instance_meta.append(network_namespace or 'None')
+            
+            # Role is second (more specific)
+            instance_meta.append(role or 'None')
+
+            # IP address last (most speifici)
+            instance_meta.append(instance['PrivateIpAddress'])
+
+            # Add to instance_list
             instance_list.append(instance_meta)
-    return instance_list
+    return sorted(instance_list)
 
 
 if __name__ == '__main__':
