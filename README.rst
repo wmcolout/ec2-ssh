@@ -2,9 +2,6 @@
 ec2-ssh
 =======
 
-A pair of command line utilities for finding and SSH-ing into your Amazon EC2
-instances by tag (such as 'Name').
-
 Forked from Instagram original code by YPlan.
 
 Installation
@@ -59,6 +56,5 @@ SSH into the "database" instance in the "staging" environment (no selection scre
 .. code-block:: bash
 
     ec2-ssh -e staging -r appserver
-
     ec2-ssh connecting to 10.11.0.15
 
