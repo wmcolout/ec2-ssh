@@ -28,34 +28,37 @@ Install the app:
 Usage
 -----
 
+This client allows you to filter on ec2 "Roles" or "Environment" tags (Rather than ssh'ing to an IP address or hostname directly).
+
+List all instances in the "staging" environment and choose one to ssh to:
+
 .. code-block:: bash
 
-    # ec2-ssh
+    ec2-ssh -e staging
+    [?] Which host?: ['staging', 'appserver', '10.11.7.186']
+     > ['staging', 'appserver', '10.11.7.186']
+       ['staging', 'appserver', '10.11.0.140']
+       ['staging', 'database', '10.11.0.15']
 
-    % ec2-ssh nginx2
-    # equivalent to
-    # ssh ubuntu@ec2-123-45-67-89.compute-1.amazonaws.com
+    ec2-ssh connecting to 10.11.7.186
 
-    % ec2-ssh root@appserver
-    % ec2-ssh deploy@nginx2 sudo restart nginx
+List all "appserver" instances regardless of environment and choose one to ssh to:
 
-    # Specifying the user with an environment variable
-    % EC2_SSH_USER=deploy ec2-ssh nginx2
+.. code-block:: bash
 
-    # ec2-host
+    ec2-ssh -r appserver
+    [?] Which host?: ['staging', 'appserver', '10.11.7.186']
+     > ['staging', 'appserver', '10.11.7.186']
+       ['staging', 'appserver', '10.11.0.140']
+       ['production', 'appserver', '10.12.0.41']
 
-    # w/o arg: prints all active instances
-    % ec2-host
-    ec2-123-45-67-89.compute-1.amazonaws.com
-    ec2-132-45-67-89.compute-1.amazonaws.com
-    ec2-231-45-67-89.compute-1.amazonaws.com
+    ec2-ssh connecting to 10.11.7.186
 
-    # w/ arg
-    % ec2-host backend
-    ec2-132-45-67-89.compute-1.amazonaws.com
-    ec2-132-45-67-90.compute-1.amazonaws.com
+SSH into the "database" instance in the "staging" environment (no selection screen since it's the only one):
 
-    # w/ tag arg too
-    % ec2-host -t environment production
-    ec2-132-45-67-90.compute-1.amazonaws.com
-    ec2-111-45-67-90.compute-1.amazonaws.com
+.. code-block:: bash
+
+    ec2-ssh -e staging -r appserver
+
+    ec2-ssh connecting to 10.11.0.15
+
