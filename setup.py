@@ -40,7 +40,7 @@ setup(
     license="MIT",
     url="https://github.com/YPlan/ec2-ssh",
     keywords=["amazon", "aws", "ec2", "ami", "ssh", "cloud", "boto"],
-    install_requires=['boto3>=1.1.0'],
+    install_requires=['boto3>=1.1.0','inquirer'],
     py_modules=['ec2_ssh'],
     entry_points={'console_scripts': console_scripts},
     classifiers=[
