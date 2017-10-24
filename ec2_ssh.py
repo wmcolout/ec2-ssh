@@ -4,6 +4,7 @@ import argparse
 import os
 import random
 import sys
+import inquirer
 
 import boto3
 
@@ -18,25 +19,29 @@ parser = argparse.ArgumentParser(
     extra arguments at the end are passed to ssh directly.
     """
 )
-parser.add_argument('-t', '--tag', type=str,
-                    default=os.getenv('EC2_HOST_TAG', 'Name'),
-                    help="Tag to match, defaults to 'Name'")
-parser.add_argument('-u', '--user', type=str,
-                    default=os.getenv('EC2_SSH_USER', 'ubuntu'),
+parser.add_argument('-r', '--role', 
+                    type=str,
+                    default=os.getenv('EC2_ROLE'),
+                    help="Role to match")
+parser.add_argument('-e', '--env', 
+                    type=str,
+                    default=os.getenv('EC2_ENV'),
+                    help="Environment to match, using network_namespace tag")
+parser.add_argument('-u', '--user', 
+                    type=str,
+                    default=os.getenv('EC2_SSH_USER', ""),
                     help="Which user to connect with, defaults to 'ubuntu'")
-parser.add_argument('value', help="The value for the tag to match")
-
 
 def main():
     args, unparsed = parser.parse_known_args()
 
-    if '@' in args.value:
-        username, value = args.value.split('@', 1)
+    if args.user != "":
+        username = args.user & "@"
     else:
         username = args.user
-        value = args.value
 
-    host_name = get_host_name(args.tag, value)
+
+    host_name = get_host_name(args)
 
     if not host_name:
         print("ec2-ssh: no hosts matched", file=sys.stderr)
@@ -45,8 +50,9 @@ def main():
     command = [
         'ssh',
         '-t', '-t',
-        username + '@' + host_name,
+        username + host_name,
     ]
+
     if unparsed:
         command.extend(unparsed)
 
@@ -54,10 +60,21 @@ def main():
     sys.stdout.flush()
     os.execlp(*command)
 
+def get_host_name(args):
+    host_list = get_instance_list(args)
 
-def get_host_name(tag, value):
-    for host in get_dns_names(tag, value):
-        return host
+    # using inquirer
+    if len(host_list) == 1:
+        host = host_list[0]
+    else:
+        questions = [
+                inquirer.List('host',
+                    message="Which host?",
+                    choices=host_list,
+                ),
+            ]
+        host = inquirer.prompt(questions)["host"]
+    return host[0]
 
 
 def ec2_host_parser():
@@ -76,13 +93,13 @@ def ec2_host_parser():
 
 def host():
     args = ec2_host_parser().parse_args()
-    instances = get_dns_names(args.tag, args.value)
+    instances = get_instance_list(args.tag, args.value)
     random.shuffle(instances)
     for instance in instances:
         print(instance)
 
 
-def get_dns_names(tag, value):
+def get_instance_list(args):
     conn = boto3.client('ec2')
 
     filters = [
@@ -91,24 +108,35 @@ def get_dns_names(tag, value):
             'Values': ['running'],
         }
     ]
-    if value:
+    if args.role:
         filters.append({
-            'Name': 'tag:' + tag,
-            'Values': [value]
+            'Name': 'tag:Roles',
+            'Values': [args.role]
+        })
+    if args.env:
+        filters.append({
+            'Name': 'tag:network_namespace',
+            'Values': [args.env]
         })
 
     data = conn.describe_instances(Filters=filters)
-
-    dns_names = []
+    instance_list = []
     for reservation in data['Reservations']:
         for instance in reservation['Instances']:
-            if instance.get('PublicDnsName'):
-                dns_names.append(instance['PublicDnsName'])
-            elif instance.get('PublicIpAddress'):
-                dns_names.append(instance['PublicIpAddress'])
-            elif instance['PrivateIpAddress']:
-                dns_names.append(instance['PrivateIpAddress'])
-    return dns_names
+            instance_meta = []
+            network_namespace = None
+            role = None
+            instance_meta.append(instance['PrivateIpAddress'])
+            for tag in instance['Tags']:
+                if tag['Key'] == 'Roles':
+                    role = (tag['Value'])
+                if tag['Key'] == 'network_namespace':
+                    network_namespace = (tag['Value'])
+
+            instance_meta.append(role or 'None')
+            instance_meta.append(network_namespace or 'None')
+            instance_list.append(instance_meta)
+    return instance_list
 
 
 if __name__ == '__main__':
