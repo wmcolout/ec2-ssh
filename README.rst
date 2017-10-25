@@ -60,24 +60,25 @@ SSH into the "database" instance in the "staging" environment (no selection scre
 
 TODO
 ----
+
 Config:
 * Explicitly configure arg_longform and arg_shortform in config
 * Heirarchy of assumptions:
-  # no longform?  assume tag name
-  # no tag name? assume top level
-  # no shortform?  take first letter
-  # first letter is in use? iterate through longform
-  # no free letters?  iterate through alphabet
+  * no longform?  assume tag name
+  * no tag name? assume top level
+  * no shortform?  take first letter
+  * first letter is in use? iterate through longform
+  * no free letters?  iterate through alphabet
 * Blacklist (fail) -h, -u, -i, --help, --user, --interactive
 * Greylist  (warn) on ssh commands
 
 
 Filters:
   * Interactive Mode:
-    # Move filter to its own list/dict
-    # Seed filter list/dict from args
-    # If `-i`, then loop through tags (from cfg), and prompt for each one
-    # Allow "None" as an option for each tag list (nice to have)
+    * Move filter to its own list/dict
+    * Seed filter list/dict from args
+    * If `-i`, then loop through tags (from cfg), and prompt for each one
+    * Allow "None" as an option for each tag list (nice to have)
 
 Code Cleanup:
   * `if args.user != "":` <-- this needs to be cleaner
