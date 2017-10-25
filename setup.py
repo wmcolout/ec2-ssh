@@ -14,7 +14,6 @@ def get_version(filename):
         contents = fp.read()
     return re.search(r"__version__ = ['\"]([^'\"]+)['\"]", contents).group(1)
 
-
 version = get_version(os.path.join('ec2_ssh.py'))
 
 with codecs.open('README.rst', 'r', 'utf-8') as readme_file:
@@ -25,7 +24,7 @@ with codecs.open('HISTORY.rst', 'r', 'utf-8') as history_file:
 
 
 console_scripts = [
-    'ec2-ssh = ec2_ssh:main',
+    'ssh-ec2 = ec2_ssh:main',
     'ec2-host = ec2_ssh:host',
 ]
 

@@ -5,10 +5,35 @@ import os
 import random
 import sys
 import inquirer
+import yaml
 
 import boto3
 
 __version__ = '1.9.0'
+
+# If config file doesn't exist, create it with some defaults
+if not os.path.exists(os.getenv("HOME") + '/.ssh-ec2.conf.yml'):
+    print (os.getenv("HOME") + '/.ssh-ec2.conf.yml' + " doesn't exist.  Generating with defaults.")
+    f = open(os.getenv("HOME") + '/.ssh-ec2.conf.yml', 'w')
+    f.write("""
+tags:
+  Environment:
+    arg: -e
+    tag: network_namespace
+  Roles:
+    arg: -r
+    tag: Roles
+""")
+    f.close() 
+
+# Read config file
+try:
+    with open(os.getenv("HOME") + '/.ssh-ec2.conf.yml', 'r') as ymlfile:
+        cfg = yaml.load(ymlfile)
+except:
+    print ("The required file `~/.ssh-ec2.conf.yml` is broken.")
+    print ("  Please delete the file and re-run the app to generate a new one)")
+    exit(5);
 
 parser = argparse.ArgumentParser(
     description="""
@@ -19,28 +44,31 @@ parser = argparse.ArgumentParser(
     extra arguments at the end are passed to ssh directly.
     """
 )
-parser.add_argument('-r', '--role', 
-                    type=str,
-                    default=os.getenv('EC2_ROLE'),
-                    help="Role to match")
-parser.add_argument('-e', '--env', 
-                    type=str,
-                    default=os.getenv('EC2_ENV'),
-                    help="Environment to match, using network_namespace tag")
 parser.add_argument('-u', '--user', 
                     type=str,
                     default=os.getenv('EC2_SSH_USER', ""),
                     help="Which user to connect with, defaults to 'ubuntu'")
+parser.add_argument('-i', '--interactive', 
+                    action='store_true',
+                    help="Interactively prompt to select for each tag filter")
+
+# Dynamically load filter arguments from config
+for tag in cfg['tags']:
+    parser.add_argument(cfg['tags'][tag]['arg'], '--' + tag, 
+                        type=str,
+                        default=os.getenv('EC2_' + tag.upper()),
+                        help= tag.upper() + " tag to match")
 
 def main():
     args, unparsed = parser.parse_known_args()
 
+    # TODO: Let's be elegant about this:
     if args.user != "":
         username = args.user & "@"
     else:
         username = args.user
 
-
+    # Go to selection screen
     host_name = get_host_name(args)
 
     if not host_name:
@@ -53,9 +81,11 @@ def main():
         username + host_name,
     ]
 
+    # Add extra arguments to ssh command
     if unparsed:
         command.extend(unparsed)
 
+    # Connect
     print("ec2-ssh connecting to {}".format(host_name), file=sys.stderr)
     sys.stdout.flush()
     os.execlp(*command)
@@ -108,38 +138,25 @@ def get_instance_list(args):
             'Values': ['running'],
         }
     ]
-    if args.role:
-        filters.append({
-            'Name': 'tag:Roles',
-            'Values': [args.role]
-        })
-    if args.env:
-        filters.append({
-            'Name': 'tag:network_namespace',
-            'Values': [args.env]
-        })
+    for cfg_tag in cfg['tags']:
+        if vars(args)[cfg_tag]:
+            filters.append({
+                'Name': 'tag:' + cfg['tags'][cfg_tag]['tag'],
+                'Values': [vars(args)[cfg_tag]]
+            })
 
     data = conn.describe_instances(Filters=filters)
     instance_list = []
     for reservation in data['Reservations']:
         for instance in reservation['Instances']:
             instance_meta = []
-            network_namespace = None
-            role = None
 
-            for tag in instance['Tags']:
-                if tag['Key'] == 'Roles':
-                    role = (tag['Value'])
-                if tag['Key'] == 'network_namespace':
-                    network_namespace = (tag['Value'])
+            for cfg_tag in cfg['tags']:
+                for ec2_tag in instance['Tags']:
+                    if ec2_tag['Key'] == cfg['tags'][cfg_tag]['tag']:
+                        instance_meta.append(ec2_tag['Value'] or 'None')
 
-            # Environment is first (least specific)
-            instance_meta.append(network_namespace or 'None')
-            
-            # Role is second (more specific)
-            instance_meta.append(role or 'None')
-
-            # IP address last (most speifici)
+            # IP address last
             instance_meta.append(instance['PrivateIpAddress'])
 
             # Add to instance_list
