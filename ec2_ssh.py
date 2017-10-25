@@ -61,6 +61,29 @@ for tag in cfg['tags']:
 
 def main():
     args, unparsed = parser.parse_known_args()
+    
+    # Build the filters query
+    applied_filters = [
+        {
+            'Name': 'instance-state-name',
+            'Values': ['running'],
+        }
+    ]
+
+
+    # Initialize filters from arguments
+    for cfg_tag in cfg['tags']:
+        if vars(args)[cfg_tag]:
+            applied_filters.append({
+                'Name': 'tag:' + cfg['tags'][cfg_tag]['tag'],
+                'Values': [vars(args)[cfg_tag]]
+            })
+
+    # Interactive mode:
+    if args.interactive:
+        for cfg_tag in cfg['tags']:
+            if not vars(args)[cfg_tag]:
+                applied_filters.append(add_filter_from_gui (applied_filters, cfg['tags'][cfg_tag]['tag']))
 
     # TODO: Let's be elegant about this:
     if args.user != "":
@@ -69,7 +92,7 @@ def main():
         username = args.user
 
     # Go to selection screen
-    host_name = get_host_name(args)
+    host_name = get_host_name(applied_filters)
 
     if not host_name:
         print("ec2-ssh: no hosts matched", file=sys.stderr)
@@ -93,9 +116,12 @@ def main():
 def get_host_name(args):
     host_list = get_instance_list(args)
 
-    # using inquirer
     if len(host_list) == 1:
         host = host_list[0]
+        print ("There is only one host connecting to: ")
+        print (host_list[0])
+        print ()
+
     else:
         questions = [
                 inquirer.List('host',
@@ -128,22 +154,40 @@ def host():
     for instance in instances:
         print(instance)
 
+def add_filter_from_gui (applied_filters, tag):
+    options = get_list_of_filters(applied_filters, tag)
+    if len(options) == 1:
+        filter = options[0]
+    else:
+        questions = [
+                inquirer.List('filter',
+                    message="Which value from tag " + tag + "?",
+                    choices=options,
+                ),
+            ]
 
-def get_instance_list(args):
+        filter = ({
+                'Name': 'tag:' + tag,
+                'Values': [inquirer.prompt(questions)["filter"]]
+            })
+    return filter
+
+def get_list_of_filters(filters, tag):
     conn = boto3.client('ec2')
 
-    filters = [
-        {
-            'Name': 'instance-state-name',
-            'Values': ['running'],
-        }
-    ]
-    for cfg_tag in cfg['tags']:
-        if vars(args)[cfg_tag]:
-            filters.append({
-                'Name': 'tag:' + cfg['tags'][cfg_tag]['tag'],
-                'Values': [vars(args)[cfg_tag]]
-            })
+    data = conn.describe_instances(Filters=filters)
+    possible_values = []
+    for reservation in data['Reservations']:
+        for instance in reservation['Instances']:
+            for ec2_tag in instance['Tags']:
+                if ec2_tag['Key'] == tag:
+                    if ec2_tag['Value'] not in possible_values:
+                        possible_values.append(ec2_tag['Value'] or 'None')
+
+    return sorted(possible_values)
+
+def get_instance_list(filters):
+    conn = boto3.client('ec2')
 
     data = conn.describe_instances(Filters=filters)
     instance_list = []

@@ -70,14 +70,11 @@ Configuration:
   - first letter is in use? iterate through longform
   - no free letters?  iterate through alphabet
 * Blacklist (fail) -h, -u, -i, --help, --user, --interactive
-* Greylist  (warn) on ssh commands
+* Greylist  (warn) on ssh command
 
 
 Filters:
   * Interactive Mode
-    - Move filter to its own list/dict
-    - Seed filter list/dict from args
-    - If `-i`, then loop through tags (from cfg), and prompt for each one
     - Allow "None" as an option for each tag list (nice to have)
 
 
@@ -86,3 +83,6 @@ Code Cleanup:
   * Make use of functions
   * Consistant naming convention for vars / functions
   * A Pythonic way to manage settings file.  
+  * Fix the --help (-h) description
+  * Scope variables (for instance calling arguments directly from functions)
+  * No need for ec2-host. Create a dry-run flag to return only the IP address.  
